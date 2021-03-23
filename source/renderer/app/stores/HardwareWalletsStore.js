@@ -1,4 +1,5 @@
 // @flow
+/* eslint-disable no-console */
 import { observable, action, runInAction, computed } from 'mobx';
 import { get, map, find, findLast, filter } from 'lodash';
 import semver from 'semver';
@@ -351,6 +352,7 @@ export default class HardwareWalletsStore extends Store {
 
   // @TODO - move to Transactions store once all logic fit and hardware wallets listed in general wallets list
   selectCoins = async (params: CoinSelectionsPaymentRequestType) => {
+    console.debug('>>>> Select coins - request params: ', JSON.stringify(params, null, ''));
     const { walletId, address, amount, assets } = params;
     const wallet = this.stores.wallets.getWalletById(walletId);
     if (!wallet)
@@ -368,6 +370,7 @@ export default class HardwareWalletsStore extends Store {
           assets,
         },
       });
+      console.debug('>>>> Select coins - Response: ', JSON.stringify(coinSelection, null, ''));
       runInAction('HardwareWalletsStore:: set coin selections', () => {
         this.txSignRequest = {
           coinSelection,
@@ -1348,6 +1351,24 @@ export default class HardwareWalletsStore extends Store {
     const metadataHashHex = null;
     const { isMainnet } = this.environment;
 
+    console.debug('>>> DATA for Ledger: ', JSON.stringify({
+      inputs: inputsData,
+      outputs: outputsData,
+      fee: fee.toString(),
+      ttl: ttl.toString(),
+      validityIntervalStartStr: absoluteSlotNumber.toString(),
+      networkId: isMainnet
+        ? HW_SHELLEY_CONFIG.NETWORK.MAINNET.networkId
+        : HW_SHELLEY_CONFIG.NETWORK.TESTNET.networkId,
+      protocolMagic: isMainnet
+        ? HW_SHELLEY_CONFIG.NETWORK.MAINNET.protocolMagic
+        : HW_SHELLEY_CONFIG.NETWORK.TESTNET.protocolMagic,
+      certificates: certificatesData,
+      withdrawals: withdrawalsData,
+      metadataHashHex,
+      devicePath,
+    }, null, ' '))
+
     try {
       const signedTransaction = await signTransactionLedgerChannel.request({
         inputs: inputsData,
@@ -1367,6 +1388,8 @@ export default class HardwareWalletsStore extends Store {
         devicePath,
       });
 
+      console.debug('>>> Ledger Response: ', JSON.stringify(signedTransaction, null, ''));
+
       const unsignedTxWithdrawals =
         withdrawals.length > 0 ? ShelleyTxWithdrawal(withdrawals) : null;
 
@@ -1380,6 +1403,7 @@ export default class HardwareWalletsStore extends Store {
         withdrawals: unsignedTxWithdrawals,
       });
 
+
       const signedWitnesses = await this._signWitnesses(
         signedTransaction.witnesses
       );
@@ -1388,8 +1412,12 @@ export default class HardwareWalletsStore extends Store {
         txWitnesses.set(0, signedWitnesses);
       }
 
+      console.debug('>>> Data prepared for serialization: ', JSON.stringify({ unsignedTx, txWitnesses }, null, ''));
+
       // Prepare serialized transaction with unsigned data and signed witnesses
       const txBody = await prepareBody(unsignedTx, txWitnesses);
+
+      console.debug('>>> Serialized TX Body we are sending to CWB: ', JSON.stringify(txBody, null, ' '));
 
       runInAction('HardwareWalletsStore:: set Transaction verified', () => {
         this.hwDeviceStatus = HwDeviceStatuses.VERIFYING_TRANSACTION_SUCCEEDED;
