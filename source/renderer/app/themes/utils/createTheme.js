@@ -3,7 +3,7 @@ import chroma from 'chroma-js';
 import { isEmpty, has } from 'lodash';
 import { createBackgroundShades, createErrorShades } from './createShades';
 import type { ThemeColors, ThemeFonts, CreateThemeParams } from '../types';
-
+//minor change
 export type PartialThemeParts = {
   colors: ThemeColors,
   fonts: ThemeFonts,
