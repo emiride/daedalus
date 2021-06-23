@@ -43,7 +43,7 @@
   },
   {
   "name": "Lines of Code in a Single File",
-  "weight": 1
+  "weight": 0
   },
   {
   "name": "Lines of Declarations in a Single File",
@@ -59,7 +59,7 @@
   },
   {
   "name": "Large Method",
-  "weight": 1
+  "weight": 0
   },
   {
   "name": "Missing Arguments Abstractions",
