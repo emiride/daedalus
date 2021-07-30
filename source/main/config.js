@@ -5,7 +5,7 @@ import { environment } from './environment';
 import { readLauncherConfig } from './utils/config';
 import { getBuildLabel } from '../common/utils/environmentCheckers';
 import type { CardanoNodeImplementations } from '../common/types/cardano-node.types';
-
+// Some random comment
 const {
   isTest,
   isProduction,
